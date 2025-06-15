@@ -1,5 +1,5 @@
+import BlogPage from './BlogPage';
 import { blog_data } from '@/Assets/assets';
-import BlogPage from './BlogPage'; // your actual component from above
 
 export async function generateMetadata({ params }) {
   const blog = blog_data.find(item => item.id === params.id);
@@ -26,5 +26,9 @@ export async function generateMetadata({ params }) {
 }
 
 export default function Page({ params }) {
-  return <BlogPage params={params} />;
+  const blog = blog_data.find(item => item.id === params.id);
+
+  if (!blog) return <div>Not Found</div>;
+
+  return <BlogPage blog={blog} />;
 }
