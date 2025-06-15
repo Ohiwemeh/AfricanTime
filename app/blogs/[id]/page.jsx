@@ -38,6 +38,11 @@ const Page = ({ params }) => {
                 });
                 setData(response.data);
                 setError(null);
+                
+                // Update meta tags dynamically for better social sharing
+                if (response.data) {
+                    updateMetaTags(response.data);
+                }
             } catch (err) {
                 console.error('Error fetching blog data:', err);
                 setError('Failed to fetch blog data');
@@ -50,7 +55,54 @@ const Page = ({ params }) => {
         fetchBlogData();
     }, [resolvedParams?.id]);
 
-    // Share functionality
+    // Function to update meta tags dynamically
+    const updateMetaTags = (blogData) => {
+        if (typeof window === 'undefined') return;
+        
+        // Update page title
+        document.title = `${blogData.title} | AfricanTimes`;
+        
+        // Update or create meta tags
+        const updateMetaTag = (property, content) => {
+            let metaTag = document.querySelector(`meta[property="${property}"]`) || 
+                         document.querySelector(`meta[name="${property}"]`);
+            
+            if (!metaTag) {
+                metaTag = document.createElement('meta');
+                if (property.startsWith('og:') || property.startsWith('twitter:')) {
+                    metaTag.setAttribute('property', property);
+                } else {
+                    metaTag.setAttribute('name', property);
+                }
+                document.head.appendChild(metaTag);
+            }
+            metaTag.setAttribute('content', content);
+        };
+
+        // Basic meta tags
+        updateMetaTag('description', blogData.description);
+        
+        // Open Graph tags
+        updateMetaTag('og:title', blogData.title);
+        updateMetaTag('og:description', blogData.description);
+        updateMetaTag('og:image', blogData.image);
+        updateMetaTag('og:url', window.location.href);
+        updateMetaTag('og:type', 'article');
+        updateMetaTag('og:site_name', 'AfricanTimes');
+        
+        // Twitter tags
+        updateMetaTag('twitter:card', 'summary_large_image');
+        updateMetaTag('twitter:title', blogData.title);
+        updateMetaTag('twitter:description', blogData.description);
+        updateMetaTag('twitter:image', blogData.image);
+        updateMetaTag('twitter:url', window.location.href);
+        
+        // Additional meta tags for better sharing
+        updateMetaTag('og:image:width', '1200');
+        updateMetaTag('og:image:height', '630');
+    };
+
+    // Share functionality with better URL encoding
     const shareOnFacebook = () => {
         if (!data) return;
         const url = encodeURIComponent(window.location.href);
@@ -61,22 +113,19 @@ const Page = ({ params }) => {
     const shareOnTwitter = () => {
         if (!data) return;
         const url = encodeURIComponent(window.location.href);
-        const text = encodeURIComponent(`Check out this article: ${data.title}`);
+        const text = encodeURIComponent(`${data.title} - Check out this article from AfricanTimes!`);
         window.open(`https://twitter.com/intent/tweet?url=${url}&text=${text}`, '_blank', 'width=600,height=400');
     };
 
     const shareOnLinkedIn = () => {
         if (!data) return;
         const url = encodeURIComponent(window.location.href);
-        const title = encodeURIComponent(data.title);
-        const summary = encodeURIComponent(data.description || '');
-        window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${url}&title=${title}&summary=${summary}`, '_blank', 'width=600,height=400');
+        window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${url}`, '_blank', 'width=600,height=400');
     };
 
     const shareOnWhatsApp = () => {
         if (!data) return;
-        const url = encodeURIComponent(window.location.href);
-        const text = encodeURIComponent(`Check out this article: ${data.title} - ${url}`);
+        const text = encodeURIComponent(`*${data.title}*\n\n${data.description}\n\nRead more: ${window.location.href}`);
         window.open(`https://wa.me/?text=${text}`, '_blank');
     };
 
@@ -106,7 +155,7 @@ const Page = ({ params }) => {
             try {
                 await navigator.share({
                     title: data.title,
-                    text: data.description || 'Check out this article!',
+                    text: data.description || 'Check out this article from AfricanTimes!',
                     url: window.location.href,
                 });
             } catch (err) {
@@ -261,6 +310,18 @@ const Page = ({ params }) => {
                                 className='flex-1 p-2 text-sm bg-white border border-gray-300 rounded'
                             />
                         </div>
+                    </div>
+
+                    {/* Debug Information - Remove in production */}
+                    <div className='mt-6 p-4 bg-blue-50 rounded-lg text-sm'>
+                        <p className='font-semibold text-blue-800 mb-2'>Share Debug Info:</p>
+                        <p><strong>Title:</strong> {data.title}</p>
+                        <p><strong>Description:</strong> {data.description}</p>
+                        <p><strong>Image:</strong> {data.image}</p>
+                        <p><strong>URL:</strong> {typeof window !== 'undefined' ? window.location.href : 'Loading...'}</p>
+                        <p className='text-xs text-blue-600 mt-2'>
+                            Note: Meta tags are updated dynamically. Use Facebook Debugger or Twitter Card Validator to test.
+                        </p>
                     </div>
                 </div>
             </div>
