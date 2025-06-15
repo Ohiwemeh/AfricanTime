@@ -4,13 +4,16 @@ import Footer from '@/Components/Footer';
 import axios from 'axios';
 import Image from 'next/image';
 import Link from 'next/link';
+import Head from 'next/head';
 import React, { useEffect, useState, use } from 'react'
 import {
   WhatsappShareButton,
   WhatsappIcon,
+  FacebookShareButton,
+  FacebookIcon,
+  TwitterShareButton,
+  TwitterIcon,
 } from 'next-share'
-
-
 
 const Page = ({ params }) => {
    
@@ -42,18 +45,23 @@ const Page = ({ params }) => {
                     params: { id: resolvedParams.id }
                 });
                 setData(response.data);
-                setError(null); // Clear any previous errors
+                setError(null);
             } catch (err) {
                 console.error('Error fetching blog data:', err);
                 setError('Failed to fetch blog data');
                 setData(null);
             } finally {
-                setLoading(false); // This was missing!
+                setLoading(false);
             }
         };
 
         fetchBlogData();
     }, [resolvedParams?.id]);
+
+    // Create the share URL
+    const shareUrl = typeof window !== 'undefined' 
+        ? `${window.location.origin}/blog/${resolvedParams?.id}` 
+        : '';
 
     if (loading) {
         return (
@@ -81,6 +89,30 @@ const Page = ({ params }) => {
 
     return (
         <>
+            <Head>
+                {/* Basic Meta Tags */}
+                <title>{data.title}</title>
+                <meta name="description" content={data.description} />
+                
+                {/* Open Graph Meta Tags for Facebook, LinkedIn, etc. */}
+                <meta property="og:type" content="article" />
+                <meta property="og:title" content={data.title} />
+                <meta property="og:description" content={data.description} />
+                <meta property="og:image" content={data.image} />
+                <meta property="og:url" content={shareUrl} />
+                <meta property="og:site_name" content="Your Blog" />
+                
+                {/* Twitter Meta Tags */}
+                <meta name="twitter:card" content="summary_large_image" />
+                <meta name="twitter:title" content={data.title} />
+                <meta name="twitter:description" content={data.description} />
+                <meta name="twitter:image" content={data.image} />
+                
+                {/* Image dimensions for better display */}
+                <meta property="og:image:width" content="1280" />
+                <meta property="og:image:height" content="720" />
+            </Head>
+
             <div className='bg-gray-200 py-5 px-5 md:px-12 lg:px-28'>
                 <div className='flex justify-between items-center'>
                     <Link href='/' >
@@ -92,22 +124,42 @@ const Page = ({ params }) => {
                 </div>
                 <div className='text-center my-24'>
                     <h1 className='text-2xl sm:text-5xl font-semibold max-w-[700px] mx-auto'>{data.title}</h1>
-                    {/* <Image className='mx-auto mt-6 border border-white rounded-full' src={data.author_img} width={60} height={60} alt=''/> */}
                     <p className='mt-1 pb-2 text-lg max-w-[740px] mx-auto'>Admin</p>
                 </div>
             </div>
+            
             <div className=' mx-5 max-w-[800px] md:mx-auto mt-[-100px] mb-10'>
                 <Image className='border-4 border-white' src={data.image} width={1280} height={720} alt='' />
                 <h1 className='my-8 text-[26px] font-semibold'>Introduction:</h1>
                 <p>{data.description}</p>
              
-               <WhatsappShareButton
-  url={'https://github.com/next-share'}
-  title={'next-share is a social share buttons for your next React apps.'}
-  separator=":: "
->
-  <WhatsappIcon size={32} round />
-</WhatsappShareButton>
+                {/* Share Buttons Section */}
+                <div className="mt-8 mb-6">
+                    <h3 className="text-lg font-semibold mb-4">Share this article:</h3>
+                    <div className="flex gap-3 items-center">
+                        <WhatsappShareButton
+                            url={shareUrl}
+                            title={data.title}
+                            separator=" - "
+                        >
+                            <WhatsappIcon size={32} round />
+                        </WhatsappShareButton>
+
+                        <FacebookShareButton
+                            url={shareUrl}
+                            quote={data.title}
+                        >
+                            <FacebookIcon size={32} round />
+                        </FacebookShareButton>
+
+                        <TwitterShareButton
+                            url={shareUrl}
+                            title={data.title}
+                        >
+                            <TwitterIcon size={32} round />
+                        </TwitterShareButton>
+                    </div>
+                </div>
             </div>
             <Footer/>
         </>
