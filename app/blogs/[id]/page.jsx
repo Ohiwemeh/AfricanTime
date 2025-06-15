@@ -4,7 +4,6 @@ import Footer from '@/Components/Footer';
 import axios from 'axios';
 import Image from 'next/image';
 import Link from 'next/link';
-import Head from 'next/head';
 import React, { useEffect, useState, use } from 'react'
 import {
   WhatsappShareButton,
@@ -14,6 +13,45 @@ import {
   TwitterShareButton,
   TwitterIcon,
 } from 'next-share'
+
+// Add this function for App Router metadata
+export async function generateMetadata({ params }) {
+  const resolvedParams = await params;
+  
+  try {
+    // You might need to adjust this API call based on your setup
+    const response = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/api/blog?id=${resolvedParams.id}`);
+    const data = await response.json();
+    
+    return {
+      title: data.title,
+      description: data.description,
+      openGraph: {
+        title: data.title,
+        description: data.description,
+        images: [
+          {
+            url: data.image,
+            width: 1280,
+            height: 720,
+          }
+        ],
+        type: 'article',
+      },
+      twitter: {
+        card: 'summary_large_image',
+        title: data.title,
+        description: data.description,
+        images: [data.image],
+      },
+    }
+  } catch (error) {
+    return {
+      title: 'Blog Post',
+      description: 'Read our latest blog post',
+    }
+  }
+}
 
 const Page = ({ params }) => {
    
@@ -89,30 +127,6 @@ const Page = ({ params }) => {
 
     return (
         <>
-            <Head>
-                {/* Basic Meta Tags */}
-                <title>{data.title}</title>
-                <meta name="description" content={data.description} />
-                
-                {/* Open Graph Meta Tags for Facebook, LinkedIn, etc. */}
-                <meta property="og:type" content="article" />
-                <meta property="og:title" content={data.title} />
-                <meta property="og:description" content={data.description} />
-                <meta property="og:image" content={data.image} />
-                <meta property="og:url" content={shareUrl} />
-                <meta property="og:site_name" content="Your Blog" />
-                
-                {/* Twitter Meta Tags */}
-                <meta name="twitter:card" content="summary_large_image" />
-                <meta name="twitter:title" content={data.title} />
-                <meta name="twitter:description" content={data.description} />
-                <meta name="twitter:image" content={data.image} />
-                
-                {/* Image dimensions for better display */}
-                <meta property="og:image:width" content="1280" />
-                <meta property="og:image:height" content="720" />
-            </Head>
-
             <div className='bg-gray-200 py-5 px-5 md:px-12 lg:px-28'>
                 <div className='flex justify-between items-center'>
                     <Link href='/' >
