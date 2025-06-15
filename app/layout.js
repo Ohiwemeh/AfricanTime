@@ -1,9 +1,8 @@
 import { Outfit} from "next/font/google";
-import { ClerkProvider } from '@clerk/nextjs'
 import "./globals.css";
 
 const outfit = Outfit({
-  subsets: ["latin"], // Fixed: changed from "subset" to "subsets"
+  subsets: ["latin"],
   weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"]
 });
 
@@ -14,12 +13,10 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <ClerkProvider>
-      <html lang="en">
-        <body className={outfit.className}>
-          {children}
-        </body>
-      </html>
-    </ClerkProvider>
+    <html lang="en">
+      <body className={outfit.className}>
+        {children}
+      </body>
+    </html>
   );
 }
