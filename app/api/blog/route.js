@@ -1,7 +1,13 @@
 import { connectDB } from "@/lib/config/db";
-import { writeFile } from "fs/promises";
+import { v2 as cloudinary } from "cloudinary";
 import BlogModel from "@/lib/models/BlogModel";
 import { NextResponse } from "next/server";
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
 export async function GET(request) {
   await connectDB();
@@ -22,34 +28,34 @@ export async function POST(request) {
   await connectDB();
 
   const formData = await request.formData();
-  const timeStamp = Date.now();
-
   const image = formData.get("image");
-  const imageByteData = await image.arrayBuffer();
-  const buffer = Buffer.from(imageByteData);
 
-  const extension = image.name.split('.').pop();
-  const safeFileName = `${timeStamp}_${Math.random().toString(36).substring(2)}.${extension}`;
-  const path = `./public/${safeFileName}`;
-  const imgUrl = `/${safeFileName}`;
+  const imageBuffer = Buffer.from(await image.arrayBuffer());
+  const base64Image = `data:${image.type};base64,${imageBuffer.toString("base64")}`;
 
-  await writeFile(path, buffer);
+  try {
+    // Upload to Cloudinary
+    const uploadResult = await cloudinary.uploader.upload(base64Image, {
+      folder: "blog-thumbnails",
+    });
 
-  const blogData = {
-    title: formData.get("title"),
-    description: formData.get("description"),
-    category: formData.get("category"),
-    author: formData.get("author"),
-    image: imgUrl,
-    authorImg: formData.get("authorImg"),
-  };
+    const blogData = {
+      title: formData.get("title"),
+      description: formData.get("description"),
+      category: formData.get("category"),
+      author: formData.get("author"),
+      image: uploadResult.secure_url,
+      authorImg: formData.get("authorImg"),
+    };
 
-  await BlogModel.create(blogData);
-  return NextResponse.json({ success: true, msg: "Blog created successfully" });
+    await BlogModel.create(blogData);
+    return NextResponse.json({ success: true, msg: "Blog created successfully" });
+  } catch (error) {
+    console.error("Upload error:", error);
+    return NextResponse.json({ success: false, msg: "Upload failed" }, { status: 500 });
+  }
 }
 
-
-//Api endpoint to delete a blog post
 export async function DELETE(request) {
   await connectDB();
 
