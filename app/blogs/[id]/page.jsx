@@ -22,7 +22,7 @@ const blogData = await response.json()
     openGraph: {
       title: blog.title,
       description: blog.description?.slice(0, 150),
-      images: `${process.env.NEXT_PUBLIC_BASEURL}${blog.image}`,
+      images: blog.image,
       url: `${process.env.NEXT_PUBLIC_BASEURL}/blogs/${id}`,
       type: 'article',
     },
@@ -30,7 +30,7 @@ const blogData = await response.json()
       card: 'summary_large_image',
       title: blog.title,
       description: blog.description?.slice(0, 150),
-      images: `${process.env.NEXT_PUBLIC_BASEURL}${blog.image}`,
+      images: blog.image,
     },
   };
  }
