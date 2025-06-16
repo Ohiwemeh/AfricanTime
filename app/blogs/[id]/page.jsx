@@ -3,7 +3,7 @@ import { blog_data } from '@/Assets/assets';
 
 export async function generateMetadata({ params }) {
      const { id } = await params
- const response = await fetch('http://localhost:3000/api/blog')
+ const response = await fetch(`${process.env.NEXT_PUBLIC_BASEURL}/api/blogs`)
 
 const blogData = await response.json()
   const blog = blogData.blogs.find(item => item._id === id);
@@ -22,7 +22,7 @@ const blogData = await response.json()
       title: blog.title,
       description: blog.description?.slice(0, 150),
       images: blog.image,
-      url: `https://african-time-five.vercel.app/blogs/${params.id}`,
+      url: `${process.env.NEXT_PUBLIC_BASEURL}/blogs/${params.id}`,
       type: 'article',
     },
     twitter: {
@@ -37,7 +37,7 @@ const blogData = await response.json()
 export default async function Page({ params }) {
   try{
 const { id: i } = await params;
- const response = await fetch('http://localhost:3000/api/blog')
+ const response = await fetch(`${process.env.NEXT_PUBLIC_BASEURL}/api/blogs`)
 
 const blogData = await response.json()
   const blog = blogData.blogs.find(item => item._id === i);
