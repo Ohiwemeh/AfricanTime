@@ -3,11 +3,12 @@ import { blog_data } from '@/Assets/assets';
 
 export async function generateMetadata({ params }) {
      const { id } = await params
- const response = await fetch(`${process.env.NEXT_PUBLIC_BASEURL}/api/blogs`)
+ const response = await fetch(`${process.env.NEXT_PUBLIC_BASEURL}/api/blog`)
 
 const blogData = await response.json()
   const blog = blogData.blogs.find(item => item._id === id);
 
+  
   
 
   if (!blog) return {};
@@ -21,27 +22,32 @@ const blogData = await response.json()
     openGraph: {
       title: blog.title,
       description: blog.description?.slice(0, 150),
-      images: blog.image,
-      url: `${process.env.NEXT_PUBLIC_BASEURL}/blogs/${params.id}`,
+      images: `${process.env.NEXT_PUBLIC_BASEURL}${blog.image}`,
+      url: `${process.env.NEXT_PUBLIC_BASEURL}/blogs/${id}`,
       type: 'article',
     },
     twitter: {
       card: 'summary_large_image',
       title: blog.title,
       description: blog.description?.slice(0, 150),
-      images: blog.image,
+      images: `${process.env.NEXT_PUBLIC_BASEURL}${blog.image}`,
     },
   };
-}
+ }
 
 export default async function Page({ params }) {
   try{
 const { id: i } = await params;
- const response = await fetch(`${process.env.NEXT_PUBLIC_BASEURL}/api/blogs`)
+
+ const response = await fetch(`${process.env.NEXT_PUBLIC_BASEURL}/api/blog`)
+
 
 const blogData = await response.json()
+
+
   const blog = blogData.blogs.find(item => item._id === i);
 
+  
 
 
  if (!blog) return <div>Not Found</div>;
