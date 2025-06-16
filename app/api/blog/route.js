@@ -9,6 +9,8 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
+console.log("Cloudinary API key:", process.env.CLOUDINARY_API_KEY);
+
 export async function GET(request) {
   await connectDB();
 
