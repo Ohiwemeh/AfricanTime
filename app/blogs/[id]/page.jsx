@@ -34,7 +34,7 @@ const blogData = await response.json()
     },
   };
  }
-
+ 
 export default async function Page({ params }) {
   try{
 const { id: i } = await params;

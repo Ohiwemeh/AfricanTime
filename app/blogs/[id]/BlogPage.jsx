@@ -3,12 +3,22 @@ import { assets } from '@/Assets/assets';
 import Footer from '@/Components/Footer';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useParams } from 'next/navigation'; // Correct import for App Router
 import React from 'react';
 
 const BlogPage = ({ blog }) => {
+  const params = useParams();
+  
+  // Use the blog ID from params if blog.id isn't available
+  const blogId = blog?.id || params?.id;
+  
   const fullUrl = typeof window !== 'undefined'
-    ? window.location.href
-    : `https://african-time-five.vercel.app/blogs/${blog.id}`;
+    ? `${window.location.origin}/blogs/${blogId}`
+    : `https://african-time-five.vercel.app/blogs/${blogId}`;
+
+  // Add debugging to see what's happening
+  console.log('Blog ID:', blogId);
+  console.log('Full URL:', fullUrl);
 
   return (
     <>
@@ -66,7 +76,7 @@ const BlogPage = ({ blog }) => {
               onClick={async () => {
                 try {
                   await navigator.clipboard.writeText(fullUrl);
-                  alert('Link copied to clipboard!');
+                  alert(`Link copied: ${fullUrl}`); // Show what was copied for debugging
                 } catch (err) {
                   alert('Failed to copy link.');
                 }
